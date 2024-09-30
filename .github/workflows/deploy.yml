@@ -1,0 +1,34 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  Deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Master
+        uses: actions/checkout@v2
+
+      - name: Echo ref
+        run: echo ${{ github.ref }} @ ${{ github.sha }}
+
+      - name: Authenticate on GCloud
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Use gcloud CLI
+        run: |
+          gcloud auth configure-docker us.gcr.io
+          docker build . -t us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest
+          docker push us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest
+          gcloud config set run/region us-east1
+          gcloud run deploy api --image us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest --concurrency=60 \
+            --platform managed \
+            --port=4000 \
+            --allow-unauthenticated
