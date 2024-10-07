@@ -20,6 +20,8 @@ export function useAuth() {
     await supabase.auth.signOut()
   }
 
+  const signUp = async () => {}
+
   useEffect(() => {
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
@@ -39,6 +41,7 @@ export function useAuth() {
 
   return {
     signInWithGoogle,
+    signUp,
     isSignedIn,
     signOut
   }
