@@ -1,0 +1,4 @@
+[auth.external.google]
+enabled = true
+client_id = "env('NEXT_PUBLIC_GOOGLE_CLIENT_ID')"
+secret = "env('NEXT_PUBLIC_GOOGLE_CLIENT_SECRET')"

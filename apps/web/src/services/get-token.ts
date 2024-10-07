@@ -1,19 +1,11 @@
-import * as firebase from "firebase/auth";
+import { supabase } from '@/lib/supabase/client'
+
 export class GetToken {
   public execute() {
-    return new Promise<string>((resolve, reject) => {
-      firebase.getAuth().onAuthStateChanged((user) => {
-        if (user) {
-          user.getIdToken(true)
-            .then((token) => {
-              resolve(token)
-            }).catch((error) => {
-              reject(error)
-            })
-        } else {
-          reject('User not found')
-        }
-      });
+    return new Promise<string | undefined>((resolve, reject) => {
+      supabase.auth.onAuthStateChange((_, session) => {
+        return resolve(session?.access_token)
+      })
     });
   }
 }

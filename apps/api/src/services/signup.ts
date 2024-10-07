@@ -1,24 +1,22 @@
-import { prisma } from '@/lib/prisma'
+import { db } from '@/lib/db';
 
-export const signup = async (req: Request, res: Response) => {
-  const { email, provider, providerId } = req.body
+export const signup = async (req, res) => {
+  const { email, providerId } = req.body;
 
-  const user = await prisma.user.findUnique({
-    where: {
+  const user = await db
+    .insertInto('users')
+    .values({
       email,
-    }
-  })
+      username: email.split('@')[0],
+      provider_id: providerId,
+    })
+    .onConflict((oc) => 
+      oc.column('email').doUpdateSet({
+        provider_id: providerId,
+      })
+    )
+    .returning(['id'])
+    .executeTakeFirst();
 
-  if (provider !== user?.provider) {
-    throw new Error('User already exists with different provider')
-  }
-
-  return prisma.user.create({
-    data: {
-      email,
-      username: email,
-      providerId,
-      provider,
-    }
-  })
+  return res.json(user);
 }

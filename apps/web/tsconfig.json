@@ -25,9 +25,6 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "@/list/gql": [
-        "../../libs/gql/src/index.ts"
       ]
     }
   },

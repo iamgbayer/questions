@@ -14,22 +14,9 @@
     "esModuleInterop": true,
     "strict": true,
     "baseUrl": ".",
-
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "@/list/prisma": [
-        "../../libs/prisma/src/index.ts"
-      ],
-      "@/list/get-product-info-from-json-ld": [
-        "../../libs/get-product-info-from-json-ld/src/index.ts"
-      ],
-      "@/list/gql": [
-        "../../libs/gql/src/index.ts"
-      ],
-      "@/list/fix-and-parse-json": [
-        "../../libs/fix-and-parse-json/src/index.ts"
       ]
     }
   }

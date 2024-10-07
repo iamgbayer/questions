@@ -1,28 +1,26 @@
-import { GraphQLContext } from '@/app'
-import { GraphQLError } from 'graphql'
-import * as firebase from 'firebase-admin/auth'
+import { supabase } from '@/lib/supabase'
+import { Request, Response } from 'express'
 
 export const checkIsAuthenticated = async (
-  context: GraphQLContext
-): Promise<string> => {
-  if (!context.token) {
-    throw new GraphQLError('Not authenticated')
+  req: Request,
+  res: Response
+) => {
+  const token = req.headers.authorization
+
+  if (!token) {
+    return res.status(401).json({ error: 'Not authenticated' })
   }
 
   try {
-    const payload = await firebase.getAuth().verifyIdToken(context.token)
+    const payload = await supabase.auth.getUser(token)
 
-    const user = await context.prisma.user.findUnique({
-      where: { providerId: payload.sub }
-    })
-
-    if (!user) {
-      throw new GraphQLError('User not found')
+    if (!payload.data.user) {
+      return res.status(401).json({ error: 'User not found' })
     }
 
-    return user.id
+    return payload.data.user.id
   } catch (error) {
-    console.error(error)
-    throw new GraphQLError('Not authenticated')
+    return res.status(401).json({ error: 'Not authenticated' })
   }
 }
+

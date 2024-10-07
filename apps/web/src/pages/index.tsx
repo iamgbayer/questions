@@ -1,208 +1,300 @@
-import React from 'react'
-import Link from "next/link"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import React, { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Search, ChevronRight, ChevronLeft, ArrowLeft, CheckIcon } from 'lucide-react'
+import { cn } from '@/utils'
+import { useGetQuizzes } from '@/hooks/use-get-quizzes'
+import { Quiz } from '@/services/get-quizzes'
+import { useAnswerQuiz } from '@/hooks/use-answer-quiz'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { GoogleIcon } from '@/components/google-icon'
+import { useAuth } from '@/hooks/use-auth'
+import { useQueryClient } from 'react-query'
+import { isNil } from 'lodash'
+
+const topics = [
+  "JavaScript",
+  "CSS",
+  "HTML",
+  "React",
+  "Redux",
+  "Performance",
+  "Network",
+  "Testing"
+]
 
 export default function Index() {
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filteredQuestions, setFilteredQuestions] = useState<Quiz[]>([])
+  const { data: quizzes = [], isLoading } = useGetQuizzes()
+  const { data: answer, mutate: answerQuiz, reset: resetAnswer } = useAnswerQuiz()
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
+  const [showAnswer, setShowAnswer] = useState(false)
+  const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
+  const { signInWithGoogle, isSignedIn, signOut } = useAuth()
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (quizzes.length > 0) {
+      setFilteredQuestions(quizzes)
+    }
+  }, [quizzes])
+
+  useEffect(() => {
+    const filtered = quizzes.filter(quiz =>
+      (selectedTopics.length === 0 || selectedTopics.includes(quiz.topic)) &&
+      quiz.question.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    setFilteredQuestions(filtered)
+  }, [selectedTopics, searchQuery])
+
+  const toggleTopic = (topic: string) => {
+    setSelectedTopics(prev =>
+      prev.includes(topic) ? prev.filter(t => t !== topic) : [...prev, topic]
+    )
+  }
+
+  const handleQuestionClick = (index: number) => {
+    if (!isSignedIn) {
+      setIsSignInDialogOpen(true)
+      return
+    }
+
+    resetAnswer()
+    setCurrentQuestionIndex(index)
+    setSelectedAnswer(null)
+    setShowAnswer(false)
+  }
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex !== null && currentQuestionIndex < filteredQuestions.length - 1) {
+      handleQuestionClick(currentQuestionIndex + 1)
+    }
+  }
+
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex !== null && currentQuestionIndex > 0) {
+      handleQuestionClick(currentQuestionIndex - 1)
+    }
+  }
+
+  const handleShowExplanation = () => {
+    setShowAnswer(true)
+  }
+
+  const handleAnswerChange = (value: string) => {
+    if (currentQuestionIndex === null) {
+      return
+    }
+
+    const currentQuiz = quizzes[currentQuestionIndex];
+
+    if (!currentQuiz) {
+      return
+    }
+
+    setSelectedAnswer(parseInt(value))
+    answerQuiz({
+      quiz_id: currentQuiz.id,
+      answer: parseInt(value)
+    })
+  }
+
+  const getDifficultyBadgeColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy':
+        return 'bg-green-500 hover:bg-green-500'
+      case 'Medium':
+        return 'bg-yellow-500 hover:bg-yellow-500'
+      case 'Hard':
+        return 'bg-red-500 hover:bg-red-500'
+    }
+  }
+
+  const getTopicBadgeColor = () => {
+    return 'bg-black hover:bg-black'
+  }
+
+  const getAnswerColor = (index: number) => {
+    if (answer && index === answer.user_answer) {
+      return answer.is_correct ? 'text-green-600 font-bold border-green-600' : 'text-red-600 font-bold border-red-600'
+    }
+
+    return 'transition-colors duration-200'
+  }
+
+  const handleSignIn = () => {
+    signInWithGoogle()
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    queryClient.invalidateQueries('quizzes')
+  }
+
   return (
     <>
-      <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-            <div className="flex flex-col justify-center space-y-4">
-              <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                  Revise.LC: Mastering Coding Patterns Through Spaced Repetition
-                </h1>
-                <p className="max-w-[600px] text-gray-500 md:text-xl dark:text-gray-400">
-                  Revise.LC transforms LeetCode practice through personalized review sessions, enhancing long-term
-                  retention and understanding of coding patterns. Designed for beginners and advanced coders alike,
-                  unlock your full potential.
-                </p>
+      <header className="border-b bg-white shadow-sm py-4 px-8 fixed w-full">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Frontend Quiz</h1>
+          {isSignedIn ? (
+            <Button onClick={handleSignOut}>Sign Out</Button>
+          ) : (
+            <Button onClick={() => setIsSignInDialogOpen(true)}>Sign In</Button>
+          )}
+        </div>
+      </header>
+
+      <div className="min-h-screen bg-background text-foreground p-8 pt-24">
+        <div className="max-w-6xl mx-auto">
+          {currentQuestionIndex === null ? (
+            <>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {topics.map(topic => (
+                  <Button
+                    key={topic}
+                    variant={selectedTopics.includes(topic) ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => toggleTopic(topic)}
+                    className="rounded-full"
+                  >
+                    {topic}
+                  </Button>
+                ))}
               </div>
-              <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Link
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-gray-900 px-8 text-sm font-medium text-gray-50 shadow transition-colors hover:bg-gray-900/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
-                  href="#"
-                >
-                  Get Started
-                </Link>
+
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search quiz questions"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <div className="flex items-center gap-4 text-muted-foreground mb-6">
+                <div className="flex items-center gap-2">
+                  <span>{filteredQuestions.length} {filteredQuestions.length === 1 ? "question" : "questions"}</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {filteredQuestions.map((question, index) => (
+                  <Card key={question.id} className="cursor-pointer hover:bg-accent" onClick={() => handleQuestionClick(index)}>
+                    <CardContent className="p-4 flex items-center">
+                      <div className={cn("flex rounded-full w-7 h-7 justify-center items-center border-solid border mr-4",
+                        question.has_been_practiced ? "bg-green-500" : "bg-current-foreground",
+                        question.has_been_practiced ? "text-white" : "text-muted-foreground",
+                        { "border-green-500": question.has_been_practiced }
+                      )}>
+                        {question.has_been_practiced && <CheckIcon className='text-current w-4 h-4' />}
+                      </div>
+
+                      <div className="flex flex-col">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">{question.question}</h3>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Badge className={getDifficultyBadgeColor(question.difficulty)}>{question.difficulty}</Badge>
+                          <Badge className={getTopicBadgeColor()}>{question.topic}</Badge>
+                          <span className="text-sm text-muted-foreground">{question.total_attempt_count} {question.total_attempt_count === 1 ? "attempt" : "attempts"}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex">
+              <div className="w-1/4 pr-4 border-r">
+                <Button variant="ghost" className="mb-4" onClick={() => setCurrentQuestionIndex(null)}>
+                  <ArrowLeft className="mr-2 h-4 w-4" /> Back to list
+                </Button>
+                <div className="space-y-2">
+                  {filteredQuestions.map((question, index) => (
+                    <div
+                      key={question.id}
+                      className={`p-2 rounded cursor-pointer ${index === currentQuestionIndex ? 'bg-accent' : 'hover:bg-accent'}`}
+                      onClick={() => handleQuestionClick(index)}
+                    >
+                      {question.question}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="w-3/4 pl-8">
+                <h3 className="text-xl font-semibold mb-4">{filteredQuestions[currentQuestionIndex].question}</h3>
+                <div className="flex items-center gap-2 mb-6">
+                  <Badge className={getDifficultyBadgeColor(filteredQuestions[currentQuestionIndex].difficulty)}>{filteredQuestions[currentQuestionIndex].difficulty}</Badge>
+                  <Badge className={getTopicBadgeColor()}>{filteredQuestions[currentQuestionIndex].topic}</Badge>
+                </div>
+                <RadioGroup value={isNil(selectedAnswer) ? '' : selectedAnswer.toString()} onValueChange={handleAnswerChange}>
+                  {filteredQuestions[currentQuestionIndex].options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2 mb-2">
+                      <RadioGroupItem className={getAnswerColor(index)} value={index.toString()} id={`option-${index}`} />
+                      <Label
+                        htmlFor={`option-${index}`}
+                        className={getAnswerColor(index)}
+                      >
+                        {option}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+
+                <Button className="mt-4 mb-6" onClick={handleShowExplanation} disabled={selectedAnswer === null}>
+                  Show Explanation
+                </Button>
+
+                {showAnswer && (
+                  <div className="bg-accent p-4 rounded-md">
+                    <h4 className="font-semibold mb-2">Explanation:</h4>
+                    <p>{filteredQuestions[currentQuestionIndex].explanation}</p>
+                  </div>
+                )}
+
+                <div className="flex justify-between mt-8">
+                  <Button onClick={handlePrevQuestion} disabled={currentQuestionIndex === 0}>
+                    <ChevronLeft className="mr-2 h-4 w-4" /> Prev
+                  </Button>
+                  <span>{currentQuestionIndex + 1}/{filteredQuestions.length}</span>
+                  <Button onClick={handleNextQuestion} disabled={currentQuestionIndex === filteredQuestions.length - 1}>
+                    Next <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
-            <img
-              alt="Hero"
-              className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
-              height="310"
-              src="/placeholder.svg"
-              width="550"
-            />
-          </div>
+          )}
         </div>
-      </section>
 
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-100 dark:bg-zinc-900">
-        <div className="container px-4 md:px-6">
-          <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
-            <div className="flex flex-col justify-center space-y-4">
-              <MergeIcon className="h-12 w-12 text-gray-900 dark:text-gray-50" />
-              <h3 className="text-xl font-bold">Personalized Review Sessions</h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Revise.LC customizes your practice sessions based on your performance, maximizing learning efficiency.
-                You can create your own questions and lists or use existing ones like the Grind 75 list.
-              </p>
+        <Dialog open={isSignInDialogOpen} onOpenChange={setIsSignInDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Sign in to continue</DialogTitle>
+              <DialogDescription>
+                Please sign in with your Google account to access the quiz.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center mt-4">
+              <Button onClick={handleSignIn} className="flex items-center gap-2">
+                <GoogleIcon />
+
+                Sign in with Google
+              </Button>
             </div>
-            <div className="flex flex-col justify-center space-y-4">
-              <BotIcon className="h-12 w-12 text-gray-900 dark:text-gray-50" />
-              <h3 className="text-xl font-bold">Spaced Repetition</h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Enhance long-term retention of coding patterns through our spaced repetition algorithm. When practicing
-                a question, you need to rate the difficulty, and the platform will schedule a day for you to practice it
-                again based on your rating.
-              </p>
-            </div>
-            <div className="flex flex-col justify-center space-y-4">
-              <ScaleIcon className="h-12 w-12 text-gray-900 dark:text-gray-50" />
-              <h3 className="text-xl font-bold">Free and Open Source Platform</h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Revise.LC is a free and open-source platform that helps you unlock your full potential and become a
-                coding expert.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
-          <div className="space-y-3">
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Frequently Asked Questions</h2>
-            <p className="mx-auto max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-              Get answers to the most common questions about Revise.LC.
-            </p>
-          </div>
-          <div className="mx-auto w-full max-w-2xl space-y-4">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>What is Revise.LC?</AccordionTrigger>
-                <AccordionContent>
-                  Revise.LC is a platform that transforms LeetCode practice through personalized review sessions,
-                  enhancing long-term retention and understanding of coding patterns. You can create your own questions
-                  and lists or use existing ones like the Grind 75 list.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2">
-                <AccordionTrigger>How does Revise.LC work?</AccordionTrigger>
-                <AccordionContent>
-                  Revise.LC uses a spaced repetition algorithm to customize your practice sessions based on your
-                  performance, ensuring you focus on the areas you need to improve the most. When practicing a question,
-                  you need to rate the difficulty, and the platform will schedule a day for you to practice it again based
-                  on your rating.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3">
-                <AccordionTrigger>Who is Revise.LC for?</AccordionTrigger>
-                <AccordionContent>
-                  Revise.LC is designed for both beginners and advanced coders who want to enhance their understanding of
-                  coding patterns and improve their problem-solving skills. You can create your own questions and lists or
-                  use existing ones like the Grind 75 list.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
-        </div>
-      </section>
+          </DialogContent>
+        </Dialog>
+      </div>
     </>
-  )
-}
 
-
-function BotIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 8V4H8" />
-      <rect width="16" height="12" x="4" y="8" rx="2" />
-      <path d="M2 14h2" />
-      <path d="M20 14h2" />
-      <path d="M15 13v2" />
-      <path d="M9 13v2" />
-    </svg>
-  )
-}
-
-
-function ChevronRightIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  )
-}
-
-
-function MergeIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m8 6 4-4 4 4" />
-      <path d="M12 2v10.3a4 4 0 0 1-1.172 2.872L4 22" />
-      <path d="m20 22-5-5" />
-    </svg>
-  )
-}
-
-
-function ScaleIcon(props) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
-      <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
-      <path d="M7 21h10" />
-      <path d="M12 3v18" />
-      <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
-    </svg>
   )
 }

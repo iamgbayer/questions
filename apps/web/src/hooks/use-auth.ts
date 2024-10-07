@@ -1,50 +1,45 @@
-import { GraphQLHttpClient } from '@/services/graphql-http-client'
+import { supabase } from '@/lib/supabase/client'
+import { HttpClient } from '@/services/http-client'
 import { Signup } from '@/services/signup'
-import * as firebase from 'firebase/auth'
+import { useEffect, useState } from 'react'
 
 export function useAuth() {
-  const httpClient = new GraphQLHttpClient()
+  const httpClient = new HttpClient()
+  const [isSignedIn, setIsSignedIn] = useState(false)
 
-  const signUp = async (email: string, password: string) => {
-    const user = await firebase.createUserWithEmailAndPassword(firebase.getAuth(), email, password)
-    await new Signup(httpClient).execute({
-      email,
-      providerId: user.user.uid,
-      provider: 'email'
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: process.env.NEXT_PUBLIC_URL
+      }
     })
-    return user
   }
 
-  const signIn = async (email: string, password: string) => {
-    const user = await firebase.signInWithEmailAndPassword(firebase.getAuth(), email, password)
-    return user
+  const signOut = async () => {
+    await supabase.auth.signOut()
   }
 
-  async function signInWithGoogle(): Promise<firebase.User | null> {
-    return new Promise((resolve, reject) => {
-      chrome.identity.getAuthToken({ interactive: true }, async function(token) {
-        if (chrome.runtime.lastError || !token) {
-          reject(chrome.runtime.lastError || new Error('Failed to get auth token'));
-          return;
-        }
+  useEffect(() => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN') {
+        await new Signup(httpClient).execute({
+          email: session?.user.email ?? '',
+          providerId: session?.user.id ?? ''
+        })
+      }
 
-        // Create a credential with the token
-        const credential = firebase.GoogleAuthProvider.credential(null, token);
+      if(session) {
+        return setIsSignedIn(true)
+      }
 
-        try {
-          // Sign in to Firebase with the credential
-          const userCredential = await firebase.signInWithCredential(firebase.getAuth(), credential);
-          resolve(userCredential.user);
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
-  }
+      return setIsSignedIn(false)
+    })
+  }, [])
 
   return {
-    signUp,
-    signIn,
-    signInWithGoogle
+    signInWithGoogle,
+    isSignedIn,
+    signOut
   }
 }

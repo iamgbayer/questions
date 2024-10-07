@@ -31,8 +31,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import { useOnboarding } from '@/hooks/use-onboarding'
-import { useGetProfile } from '@/hooks/use-get-profile'
+
 
 const locations = [
   { value: 'br', label: 'Brasil' },
@@ -46,23 +45,16 @@ export default function Onboarding() {
   const [username, setUsername] = useState('')
   const [isOpen, setIsOpen] = useState(true)
   const [open, setOpen] = useState(false)
-  const { data: profile } = useGetProfile()
-  const { mutateAsync: onboarding } = useOnboarding()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (location && language && username) {
       console.log({ location, language, username })
-      await onboarding({ username, language, location })
       setIsOpen(false)
     } else {
       // Show an error message or highlight the missing fields
       alert('Please fill in all fields')
     }
-  }
-
-  if (profile?.user?.onboarded) {
-    return null
   }
 
   return (

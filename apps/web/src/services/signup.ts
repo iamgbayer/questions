@@ -1,48 +1,26 @@
-import { gql } from 'graphql-request'
-import { GraphQLHttpClient } from './graphql-http-client'
-import { SignupInput } from '@/gql/graphql'
+import { HttpClient } from './http-client'
+
+type SignupRequest = {
+  email: string
+  providerId: string
+}
 
 type SignupResponse = {
-  signup: {
-    id: string
-  }
+  id: string
 }
 
 export class Signup {
-  public constructor(private readonly httpClient: GraphQLHttpClient) {}
+  public constructor(private readonly httpClient: HttpClient) {}
 
-  public async execute(data: SignupInput): Promise<string> {
+  public async execute(data: SignupRequest): Promise<string> {
     try {
-      const query = gql`
-        mutation signup(
-          $email: String!
-          $providerId: String!
-          $provider: String!
-        ) {
-          signup(
-            input: {
-              email: $email
-              providerId: $providerId
-              provider: $provider
-            }
-          ) {
-            id
-          }
-        }
-      `
+      const response = await this.httpClient.request<SignupResponse>({
+        method: 'POST',
+        url: '/signup',
+        body: data
+      })
 
-      const variables: SignupInput = {
-        email: data.email,
-        providerId: data.providerId,
-        provider: data.provider,
-      }
-
-      const response = await this.httpClient.request<SignupResponse>(
-        query,
-        variables
-      )
-
-      return response.signup.id
+      return response.id
     } catch (error) {
       console.error(error)
       throw new Error('Failed to signup')

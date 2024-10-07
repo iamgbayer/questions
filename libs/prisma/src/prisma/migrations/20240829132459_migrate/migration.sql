@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Product" ALTER COLUMN "image" DROP NOT NULL,
-ALTER COLUMN "image" DROP DEFAULT;
