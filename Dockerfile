@@ -10,7 +10,7 @@ COPY yarn.lock .
 RUN yarn install --frozen-lockfile --production=false
 
 COPY --chown=node:node . .
-# RUN npx nx reset
+
 RUN npx nx build api --skip-nx-cache --verbose
 
 USER node

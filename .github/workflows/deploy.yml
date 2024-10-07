@@ -24,11 +24,11 @@ jobs:
 
       - name: Use gcloud CLI
         run: |
-          gcloud auth configure-docker us.gcr.io
-          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest .
-          docker push us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest
+          gcloud auth configure-docker us-east1-docker.pkg.dev
+          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} -t us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api/api:latest .
+          docker push us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api/api:latest
           gcloud config set run/region us-east1
-          gcloud run deploy api --image us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest --concurrency=60 \
+          gcloud run deploy api --image us-east1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/api/api:latest --concurrency=60 \
             --platform managed \
             --port=4000 \
             --allow-unauthenticated
