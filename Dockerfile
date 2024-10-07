@@ -9,6 +9,8 @@ COPY yarn.lock .
 
 RUN yarn install --frozen-lockfile --production=false
 
+RUN npx kysely-codegen
+
 COPY --chown=node:node . .
 RUN npx nx reset
 RUN npx nx build api --skip-nx-cache --verbose

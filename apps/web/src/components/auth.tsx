@@ -10,7 +10,7 @@ type Props = {
 
 export function Auth({ page = 'signin' }: Props) {
   const router = useRouter()
-  const { signUp, signIn } = useAuth()
+  const { signUp, signInWithPassword } = useAuth()
 
   const signInWithGoogle = async () => {
     await signInWithGoogle()
