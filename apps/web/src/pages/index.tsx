@@ -142,7 +142,7 @@ export default function Index() {
     <>
       <header className="border-b bg-white shadow-sm py-4 px-8 fixed w-full">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Frontend Quiz</h1>
+          <h1 className="text-2xl font-bold">React Questions</h1>
           {isSignedIn ? (
             <Button onClick={handleSignOut}>Sign Out</Button>
           ) : (

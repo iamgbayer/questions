@@ -8,6 +8,8 @@ export function useAuth() {
   const [isSignedIn, setIsSignedIn] = useState(false)
 
   const signInWithGoogle = async () => {
+    console.log('signInWithGoogle', process.env.NEXT_PUBLIC_URL)
+    
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
