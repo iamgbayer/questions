@@ -25,7 +25,7 @@ jobs:
       - name: Use gcloud CLI
         run: |
           gcloud auth configure-docker us.gcr.io
-          docker build . -t us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest
+          docker build --build-arg DATABASE_URL=${{ secrets.DATABASE_URL }} . -t us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest .
           docker push us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest
           gcloud config set run/region us-east1
           gcloud run deploy api --image us.gcr.io/${{ secrets.GCP_PROJECT_ID }}/api/api:latest --concurrency=60 \
