@@ -7,12 +7,14 @@ WORKDIR /app
 COPY package.json .
 COPY yarn.lock .
 
+RUN touch .env && echo "DATABASE_URL=${DATABASE_URL}" >> .env
+
 RUN yarn install --frozen-lockfile --production=false
 
 RUN npx kysely-codegen
 
 COPY --chown=node:node . .
-RUN npx nx reset
+# RUN npx nx reset
 RUN npx nx build api --skip-nx-cache --verbose
 
 USER node
