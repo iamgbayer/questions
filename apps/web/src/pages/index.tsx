@@ -15,6 +15,7 @@ import { GoogleIcon } from '@/components/google-icon'
 import { useAuth } from '@/hooks/use-auth'
 import { useQueryClient } from 'react-query'
 import { isNil } from 'lodash'
+import { getDifficultyBadgeColor } from '@/services/get-difficulty-badge-color'
 
 const topics = [
   "JavaScript",
@@ -106,17 +107,6 @@ export default function Index() {
     })
   }
 
-  const getDifficultyBadgeColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Easy':
-        return 'bg-green-500 hover:bg-green-500'
-      case 'Medium':
-        return 'bg-yellow-500 hover:bg-yellow-500'
-      case 'Hard':
-        return 'bg-red-500 hover:bg-red-500'
-    }
-  }
-
   const getTopicBadgeColor = () => {
     return 'bg-black hover:bg-black'
   }
@@ -187,6 +177,28 @@ export default function Index() {
               </div>
 
               <div className="space-y-4">
+                {isLoading && (
+                  <div className="space-y-4 w-full mx-auto">
+                    {[...Array(5)].map((_, i) => (
+                      <Card key={i} className="w-full">
+                        <CardContent className='p-4'>
+                          <div className="flex items-center space-x-4">
+                            <div className="h-7 w-7 rounded-full bg-gray-200 animate-pulse" />
+
+                            <div className="flex-1 space-y-2">
+                              <div className="h-5 mb-3 bg-gray-200 rounded animate-pulse" />
+                              <div className="flex items-center space-x-2">
+                                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-4 w-16 bg-gray-200 rounded animate-pulse" />
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
                 {filteredQuestions.map((question, index) => (
                   <Card key={question.id} className="cursor-pointer hover:bg-accent" onClick={() => handleQuestionClick(index)}>
                     <CardContent className="p-4 flex items-center">

@@ -21,6 +21,7 @@
     "sharedGlobals": []
   },
   "plugins": [
+    "@nxlv/python",
     {
       "plugin": "@nx/next/plugin",
       "options": {

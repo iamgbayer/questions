@@ -1,32 +1,34 @@
-FROM node:21 as builder
+# Use an official Python runtime as the base image
+FROM python:3.9-slim
 
-ENV NODE_ENV builder
+# Set the working directory in the container
+WORKDIR /app/backend
 
-WORKDIR /app
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+  build-essential \
+  curl \
+  libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
 
-COPY package.json .
-COPY yarn.lock .
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-RUN yarn install --frozen-lockfile --production=false
+# Add Poetry to PATH
+ENV PATH="${PATH}:/root/.local/bin"
 
-COPY --chown=node:node . .
+# Copy the pyproject.toml and poetry.lock files
+COPY apps/backend/pyproject.toml apps/backend/poetry.lock* ./
 
-RUN npx nx build api --skip-nx-cache --verbose
+# Install project dependencies
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
 
-USER node
+# Copy the rest of the application code
+COPY apps/backend .
 
-FROM node:21
+# Expose the port the app runs on
+EXPOSE 5000
 
-ENV NODE_ENV production
-
-USER node
-WORKDIR /app
-
-COPY --from=builder --chown=node:node /app/package.json ./
-COPY --from=builder --chown=node:node /app/yarn.lock ./
-COPY --from=builder --chown=node:node /app/node_modules/ ./node_modules/
-COPY --from=builder --chown=node:node /app/dist/apps/api/ ./dist/
-
-EXPOSE 4000
-
-CMD ["node", "dist/main.js"]
+# Command to run the application
+CMD ["poetry", "run", "flask", "run", "--host=0.0.0.0"]
