@@ -13,4 +13,4 @@ class Quiz(Base):
     correct_answer: Mapped[int] = mapped_column(Integer)
     difficulty: Mapped[str] = mapped_column(String(255))
     topic: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)

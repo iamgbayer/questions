@@ -19,9 +19,7 @@ def get_quizzes():
             (uqa.user_id == user_id, uqa.created_at),
             else_=None
         )).label('user_last_attempt_date')
-    ).outerjoin(uqa, Quiz.id == uqa.quiz_id
-    ).group_by(Quiz.id
-    ).all()
+    ).outerjoin(uqa, Quiz.id == uqa.quiz_id).group_by(Quiz.id).all()
     
     quizzes_with_attempt_info = []
     for quiz, total_attempt_count, user_last_attempt_date in quizzes:

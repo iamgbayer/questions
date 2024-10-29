@@ -11,4 +11,4 @@ class UserQuizAttempt(Base):
     quiz_id: Mapped[int] = mapped_column(Integer)
     user_answer: Mapped[int] = mapped_column(Integer)
     is_correct: Mapped[bool] = mapped_column(Boolean)
-    created_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
