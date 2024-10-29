@@ -21,4 +21,4 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Command to run the application
-CMD ["python", "-m", "backend.app", "--host=0.0.0.0"]
+CMD ["flask", "--app", "backend/app.py", "run", "--host=0.0.0.0"]
