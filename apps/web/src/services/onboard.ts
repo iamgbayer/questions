@@ -1,29 +1,29 @@
 import { HttpClient } from './http-client'
 
-type SignupRequest = {
+type OnboardRequest = {
   email: string
   providerId: string
 }
 
-type SignupResponse = {
+type OnboardResponse = {
   id: string
 }
 
-export class Signup {
+export class Onboard {
   public constructor(private readonly httpClient: HttpClient) {}
 
-  public async execute(data: SignupRequest): Promise<string> {
+  public async execute(data: OnboardRequest): Promise<string> {
     try {
-      const response = await this.httpClient.request<SignupResponse>({
+      const response = await this.httpClient.request<OnboardResponse>({
         method: 'POST',
-        url: '/signup',
+        url: '/onboard',
         body: data
       })
 
       return response.id
     } catch (error) {
       console.error(error)
-      throw new Error('Failed to signup')
+      throw new Error('Failed to onboard')
     }
   }
 }

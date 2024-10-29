@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase/client'
 import { HttpClient } from '@/services/http-client'
-import { Signup } from '@/services/signup'
+import { Onboard } from '@/services/onboard'
 import { useEffect, useState } from 'react'
 
 export function useAuth() {
@@ -22,14 +22,11 @@ export function useAuth() {
     await supabase.auth.signOut()
   }
 
-  const signUp = async () => {}
-
-  const signInWithPassword = async () => {}
-
   useEffect(() => {
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
-        await new Signup(httpClient).execute({
+        console.log('session', session)
+        await new Onboard(httpClient).execute({
           email: session?.user.email ?? '',
           providerId: session?.user.id ?? ''
         })
@@ -45,8 +42,6 @@ export function useAuth() {
 
   return {
     signInWithGoogle,
-    signInWithPassword,
-    signUp,
     isSignedIn,
     signOut
   }
