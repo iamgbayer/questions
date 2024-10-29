@@ -11,6 +11,8 @@ tmp
 
 # dependencies
 node_modules
+.venv
+__pycache__
 
 # IDEs and editors
 /.idea
