@@ -2815,6 +2815,14 @@
   dependencies:
     "@radix-ui/react-slot" "1.1.0"
 
+"@radix-ui/react-progress@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-progress/-/react-progress-1.1.0.tgz#28c267885ec154fc557ec7a66cb462787312f7e2"
+  integrity sha512-aSzvnYpP725CROcxAOEBVZZSIQVQdHgBr2QQFKySsaD14u8dNT0batuXI+AAGDdAHfXH8rbnHmjYFqVJ21KkRg==
+  dependencies:
+    "@radix-ui/react-context" "1.1.0"
+    "@radix-ui/react-primitive" "2.0.0"
+
 "@radix-ui/react-radio-group@^1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-radio-group/-/react-radio-group-1.2.1.tgz#42b914c85f3a77be3ab766b6e49a9598680f76d1"
@@ -11753,6 +11761,11 @@ react-dom@18.2.0:
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.0"
+
+react-ga4@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/react-ga4/-/react-ga4-2.1.0.tgz#56601f59d95c08466ebd6edfbf8dede55c4678f9"
+  integrity sha512-ZKS7PGNFqqMd3PJ6+C2Jtz/o1iU9ggiy8Y8nUeksgVuvNISbmrQtJiZNvC/TjDsqD0QlU5Wkgs7i+w9+OjHhhQ==
 
 react-hook-form@^7.51.0:
   version "7.53.0"

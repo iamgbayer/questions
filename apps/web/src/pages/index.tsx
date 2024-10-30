@@ -119,28 +119,8 @@ export default function Index() {
     return 'transition-colors duration-200'
   }
 
-  const handleSignIn = () => {
-    signInWithGoogle()
-  }
-
-  const handleSignOut = async () => {
-    await signOut()
-    queryClient.invalidateQueries('quizzes')
-  }
-
   return (
     <>
-      <header className="z-50 border-b bg-white shadow-sm py-4 px-8 fixed w-full">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">React Questions</h1>
-          {isSignedIn ? (
-            <Button onClick={handleSignOut}>Sign Out</Button>
-          ) : (
-            <Button onClick={() => setIsSignInDialogOpen(true)}>Sign In</Button>
-          )}
-        </div>
-      </header>
-
       <div className="min-h-screen bg-background text-foreground p-8 pt-24">
         <div className="max-w-6xl mx-auto">
           {currentQuestionIndex === null ? (
@@ -287,26 +267,7 @@ export default function Index() {
             </div>
           )}
         </div>
-
-        <Dialog open={isSignInDialogOpen} onOpenChange={setIsSignInDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Sign in to continue</DialogTitle>
-              <DialogDescription>
-                Please sign in with your Google account to access the quiz.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="flex justify-center mt-4">
-              <Button onClick={handleSignIn} className="flex items-center gap-2">
-                <GoogleIcon />
-
-                Sign in with Google
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </>
-
   )
 }
