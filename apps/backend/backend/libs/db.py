@@ -8,14 +8,8 @@ engine = create_engine(os.environ.get("DATABASE_URL"))
 
 Base.metadata.create_all(engine)
 
-SessionLocal = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+Session = scoped_session(sessionmaker(bind=engine))
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    except Exception as e:
-        db.rollback()  # Roll back any failed transaction
-        raise e
-    finally:
-        db.close()  # Close the session after use
+    db = Session()
+    return db

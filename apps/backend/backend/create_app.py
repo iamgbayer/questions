@@ -9,6 +9,12 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
     init_routes(app)
-
+    
+    from backend.libs.db import Session
+    
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        Session.remove()
+    
     return app
 

@@ -13,7 +13,7 @@ def get_user_id(request: Request):
         if not payload.user:
             return None
         
-        db = next(get_db())
+        db = get_db()
         user = db.query(User).where(User.provider_id == payload.user.id).first()
         return user.id if user else None
     except:

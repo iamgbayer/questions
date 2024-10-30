@@ -3,7 +3,7 @@ from flask import request
 from backend.models.user import User
 
 def onboard():
-  db = next(get_db())
+  db = get_db()
   provider_id = request.json.get('providerId')
   user = db.query(User).where(User.provider_id == provider_id).first()
   
@@ -15,6 +15,7 @@ def onboard():
     username = email.split('@')[0]
 
     user = db.insert('users').values(email=email, username=username, provider_id=provider_id).returning(User).execute_one()
+    db.commit()
 
   return {
     "email": user.email,

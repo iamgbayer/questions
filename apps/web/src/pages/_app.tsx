@@ -1,4 +1,5 @@
 import { Header } from '@/components/header'
+import { SignInDialog } from '@/components/signin-dialog'
 import { Root } from '@/layouts/root'
 import { SignInDialogProvider } from '@/providers/signin-dialog'
 import { NextPage } from 'next'
@@ -22,6 +23,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   return (
     <Root>
       <SignInDialogProvider>
+        <SignInDialog />
         <Header />
         {getLayout(<Component {...pageProps} />)}
       </SignInDialogProvider>

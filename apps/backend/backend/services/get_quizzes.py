@@ -8,7 +8,7 @@ from backend.libs.db import get_db
 from sqlalchemy import case
 
 def get_quizzes():
-    db = next(get_db())
+    db = get_db()
     user_id = get_user_id(request)
     
     uqa = aliased(UserQuizAttempt)

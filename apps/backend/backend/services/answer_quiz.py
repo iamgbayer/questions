@@ -5,7 +5,7 @@ from backend.models.quiz import Quiz
 from backend.models.user_quiz_attempt import UserQuizAttempt
 
 def answer_quiz(quiz_id: str):
-  db = next(get_db())
+  db = get_db()
   user_id = get_user_id(request)
   
   if not user_id:
