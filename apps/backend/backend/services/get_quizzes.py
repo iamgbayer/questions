@@ -4,10 +4,11 @@ from sqlalchemy.orm import aliased
 from backend.models.quiz import Quiz
 from backend.models.user_quiz_attempt import UserQuizAttempt
 from backend.services.get_user_id import get_user_id
-from backend.libs.db import db
+from backend.libs.db import get_db
 from sqlalchemy import case
 
 def get_quizzes():
+    db = next(get_db())
     user_id = get_user_id(request)
     
     uqa = aliased(UserQuizAttempt)

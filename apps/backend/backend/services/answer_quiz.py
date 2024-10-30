@@ -1,10 +1,11 @@
 from backend.services.get_user_id import get_user_id
 from flask import request
-from backend.libs.db import db
+from backend.libs.db import get_db
 from backend.models.quiz import Quiz
 from backend.models.user_quiz_attempt import UserQuizAttempt
 
 def answer_quiz(quiz_id: str):
+  db = next(get_db())
   user_id = get_user_id(request)
   
   if not user_id:

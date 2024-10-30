@@ -1,9 +1,9 @@
-from backend.libs.db import db
-from flask import request, jsonify
-from backend.services.get_user_id import get_user_id
+from backend.libs.db import get_db
+from flask import request
 from backend.models.user import User
 
 def onboard():
+  db = next(get_db())
   provider_id = request.json.get('providerId')
   user = db.query(User).where(User.provider_id == provider_id).first()
   
