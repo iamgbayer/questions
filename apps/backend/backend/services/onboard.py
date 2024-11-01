@@ -8,18 +8,25 @@ def onboard():
   user = db.query(User).where(User.provider_id == provider_id).first()
   
   if not user:
-    return { "error": "User not found" }, 404
-  
-  if user.is_onboarded == False:
     email = request.json.get('email')
     username = email.split('@')[0]
-
-    user = db.insert('users').values(email=email, username=username, provider_id=provider_id).returning(User).execute_one()
+    photo_url = request.json.get('photoUrl')
+    user = User(email=email, username=username, provider_id=provider_id, photo_url=photo_url)
+    db.add(user)
     db.commit()
-
+    
+    return {
+      "email": user.email,
+      "username": user.username,
+      "photo_url": user.photo_url,
+      "provider_id": user.provider_id,
+      "is_onboarded": user.is_onboarded
+    }, 200
+  
   return {
     "email": user.email,
     "username": user.username,
+    "photo_url": user.photo_url,
     "provider_id": user.provider_id,
     "is_onboarded": user.is_onboarded
   }, 200

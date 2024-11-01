@@ -5,11 +5,9 @@ import { useEffect, useState } from 'react'
 
 export function useAuth() {
   const httpClient = new HttpClient()
-  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   const signInWithGoogle = async () => {
-    console.log('signInWithGoogle', process.env.NEXT_PUBLIC_URL)
-    
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -25,24 +23,26 @@ export function useAuth() {
   useEffect(() => {
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN') {
-        console.log('session', session)
         await new Onboard(httpClient).execute({
+          photoUrl: session?.user.user_metadata.picture ?? '',
           email: session?.user.email ?? '',
           providerId: session?.user.id ?? ''
         })
       }
 
       if(session) {
-        return setIsSignedIn(true)
+        return setIsAuthenticated(true)
       }
 
-      return setIsSignedIn(false)
+      return setIsAuthenticated(false)
     })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
     signInWithGoogle,
-    isSignedIn,
+    isAuthenticated,
     signOut
   }
 }

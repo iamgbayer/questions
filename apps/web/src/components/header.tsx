@@ -3,9 +3,11 @@ import { Button } from "./ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { useSignInDialog } from "@/hooks/use-signin-dialog";
 import { useRouter } from "next/router";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
+import { Tooltip } from "./ui/tooltip";
 
 export function Header() {
-  const { isSignedIn, signOut } = useAuth()
+  const { isAuthenticated, signOut } = useAuth()
   const router = useRouter()
 
   const handleSignOut = async () => {
@@ -19,10 +21,20 @@ export function Header() {
       <h1 className="text-2xl font-bold">React Questions</h1>
 
       <div className="flex items-center gap-4">
-        <span className="text-muted-foreground cursor-pointer">Home</span>
-        <span className="text-muted-foreground cursor-pointer">Ranking</span>
+        <span className="text-muted-foreground cursor-pointer" onClick={() => router.push('/')}>Home</span>
 
-        {isSignedIn ? (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-muted-foreground cursor-not-allowed">Ranking</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Not available yet</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {isAuthenticated ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="w-10 h-10 rounded-full">

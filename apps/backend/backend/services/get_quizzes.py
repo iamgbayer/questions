@@ -6,6 +6,7 @@ from backend.models.user_quiz_attempt import UserQuizAttempt
 from backend.services.get_user_id import get_user_id
 from backend.libs.db import get_db
 from sqlalchemy import case
+import datetime
 
 def get_quizzes():
     db = get_db()
@@ -13,7 +14,7 @@ def get_quizzes():
     
     uqa = aliased(UserQuizAttempt)
 
-    quizzes = db.query(
+    quizzes: list[tuple[Quiz, int, datetime.datetime]] = db.query(
         Quiz,
         func.count(uqa.id).label('total_attempt_count'),
         func.max(case(

@@ -3,6 +3,7 @@ import { HttpClient } from './http-client'
 type OnboardRequest = {
   email: string
   providerId: string
+  photoUrl: string
 }
 
 type OnboardResponse = {

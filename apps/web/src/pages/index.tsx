@@ -10,12 +10,11 @@ import { cn } from '@/utils'
 import { useGetQuizzes } from '@/hooks/use-get-quizzes'
 import { Quiz } from '@/services/get-quizzes'
 import { useAnswerQuiz } from '@/hooks/use-answer-quiz'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { GoogleIcon } from '@/components/google-icon'
 import { useAuth } from '@/hooks/use-auth'
 import { useQueryClient } from 'react-query'
 import { isNil } from 'lodash'
 import { getDifficultyBadgeColor } from '@/services/get-difficulty-badge-color'
+import { useSignInDialog } from '@/hooks/use-signin-dialog'
 
 const topics = [
   "JavaScript",
@@ -37,9 +36,9 @@ export default function Index() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [showAnswer, setShowAnswer] = useState(false)
-  const [isSignInDialogOpen, setIsSignInDialogOpen] = useState(false)
-  const { signInWithGoogle, isSignedIn, signOut } = useAuth()
+  const { signInWithGoogle, isAuthenticated, signOut } = useAuth()
   const queryClient = useQueryClient()
+  const { setIsSignInDialogOpen } = useSignInDialog()
 
   useEffect(() => {
     if (quizzes.length > 0) {
@@ -62,7 +61,7 @@ export default function Index() {
   }
 
   const handleQuestionClick = (index: number) => {
-    if (!isSignedIn) {
+    if (!isAuthenticated) {
       setIsSignInDialogOpen(true)
       return
     }

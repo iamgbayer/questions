@@ -1,6 +1,6 @@
 from datetime import datetime
 from backend.models.base import Base
-from sqlalchemy import String, Integer, DateTime, Boolean
+from sqlalchemy import String, Integer, DateTime, Boolean, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 class User(Base):
@@ -12,3 +12,5 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(255))
     provider_id: Mapped[str] = mapped_column(String(255))
     is_onboarded: Mapped[bool] = mapped_column(Boolean, default=False)
+    photo_url: Mapped[str] = mapped_column(Text, nullable=True)
+    points: Mapped[int] = mapped_column(Integer, default=50)
